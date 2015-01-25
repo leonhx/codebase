@@ -94,9 +94,13 @@ bin/
 target/
 submission/
 
-# Text file
+# Text files
 *.txt
 
 # IDE
 .idea/
 *.iml
+
+# Data files
+*.dat
+*.data

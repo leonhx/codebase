@@ -34,7 +34,7 @@ class LSSVM(object):
             for j in xrange(N):
                 K[i, j] = self.kernel(X[i], X[j])
 
-        self.beta = np.linalg.pinv(K + self.lamda).dot(y)
+        self.beta = np.linalg.pinv(K + self.lamda * np.eye(N)).dot(y)
         self.X = X
 
 

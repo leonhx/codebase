@@ -82,9 +82,6 @@ def q19():
     for gamma in [32, 2, 0.125]:
         for lamda in [0.001, 1, 1000]:
             clf = LSSVM(lamda, rbf(gamma))
-            # from sklearn import svm
-            # clf = svm.SVR(kernel='rbf', gamma=gamma, C=1./lamda, epsilon=0,
-            #               shrinking=False)
             clf.fit(X_train, y_train)
             err = 0.0
             for i in xrange(len(X_train)):
@@ -98,9 +95,6 @@ def q20():
     for gamma in [32, 2, 0.125]:
         for lamda in [0.001, 1, 1000]:
             clf = LSSVM(lamda, rbf(gamma))
-            # from sklearn import svm
-            # clf = svm.SVR(kernel='rbf', gamma=gamma, C=1./lamda, epsilon=0,
-            #               shrinking=False)
             clf.fit(X_train, y_train)
             err = 0.0
             for i in xrange(len(X_test)):
