@@ -1,4 +1,5 @@
 import numpy as np
+from random import randint
 
 
 class Bagging(object):
@@ -10,8 +11,8 @@ class Bagging(object):
 
     def __fit_one__(self, X, y):
         model = self.get_model()
-        indices = np.random.random_integers(0, len(X) - 1,
-                                            int(self.sample_size * len(X)))
+        indices = [randint(0, len(X) - 1)
+                   for _ in xrange(int(self.sample_size * len(X)))]
         model.fit(X[indices], y[indices])
         return model
 
