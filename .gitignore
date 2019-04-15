@@ -92,3 +92,6 @@ project/
 bin/
 target/
 submission/
+
+# Text file
+*.txt
