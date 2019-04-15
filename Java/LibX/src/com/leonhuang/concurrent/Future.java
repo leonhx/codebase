@@ -52,6 +52,7 @@ public class Future<T> {
         this.hasCalledOnComplete.set(false);
         final Future<T> self = this;
         new Thread() {
+            @Override
             public void run() {
                 try {
                     final T result = self.promise.apply();
