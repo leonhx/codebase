@@ -2,8 +2,28 @@
 __pycache__/
 *.py[cod]
 
-# C extensions
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.ko
+
+# Compiled Dynamic libraries
 *.so
+*.dylib
+*.dll
+*.so.*
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
 
 # Distribution / packaging
 .Python
@@ -52,3 +72,9 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
+# Text editor:
+*~
+*.swp
+*.swap
+*.tmp
+*.temp
