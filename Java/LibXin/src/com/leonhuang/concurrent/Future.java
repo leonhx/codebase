@@ -6,14 +6,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Future<T> {
-    public interface SuccessCallback<T> {
-        public void apply(T value);
+    public abstract class SuccessCallback {
+        public abstract void apply(T value);
     }
-    public interface FailureCallback {
-        public void apply(Exception error);
+    public abstract class FailureCallback {
+        public abstract void apply(Exception error);
     }
-    public interface CompleteCallback<T> {
-        public void apply(Either<T, Exception> result);
+    public abstract class CompleteCallback {
+        public abstract void apply();
     }
 
     private final Promise<T> promise;
@@ -21,12 +21,12 @@ public class Future<T> {
     private final AtomicBoolean succeeded = new AtomicBoolean();
     private final AtomicReference<T> result = new AtomicReference<T>();
     private final AtomicReference<Exception> error = new AtomicReference<Exception>();
-    private SuccessCallback<T> callOnSuccess;
+    private SuccessCallback successCallback;
     private final AtomicBoolean hasCalledOnSuccess = new AtomicBoolean();
-    private FailureCallback callOnFailure;
+    private FailureCallback failureCallback;
     private final AtomicBoolean hasCalledOnFailure = new AtomicBoolean();
-    private CompleteCallback<T> callOnDone;
-    private final AtomicBoolean hasCalledOnDone = new AtomicBoolean();
+    private CompleteCallback completeCallback;
+    private final AtomicBoolean hasCalledOnComplete = new AtomicBoolean();
 
     protected Future(final Promise<T> p) {
         this.promise = p;
@@ -38,20 +38,20 @@ public class Future<T> {
         final Either<T, Exception> resultOrError = new Either<T, Exception>();
         if (this.succeeded.get()) {
             resultOrError._1(this.result.get());
-            if (this.callOnSuccess != null && !this.hasCalledOnSuccess.get()) {
-                this.callOnSuccess.apply(this.result.get());
+            if (this.successCallback != null && !this.hasCalledOnSuccess.get()) {
+                this.successCallback.apply(this.result.get());
                 this.hasCalledOnSuccess.set(true);
             }
         } else {
             resultOrError._2(this.error.get());
-            if (this.callOnFailure != null && !this.hasCalledOnFailure.get()) {
-                this.callOnFailure.apply(this.error.get());
+            if (this.failureCallback != null && !this.hasCalledOnFailure.get()) {
+                this.failureCallback.apply(this.error.get());
                 this.hasCalledOnFailure.set(true);
             }
         }
-        if (this.callOnDone != null && !this.hasCalledOnDone.get()) {
-            this.callOnDone.apply(resultOrError);
-            this.hasCalledOnDone.set(true);
+        if (this.completeCallback != null && !this.hasCalledOnComplete.get()) {
+            this.completeCallback.apply();
+            this.hasCalledOnComplete.set(true);
         }
     }
 
@@ -59,7 +59,7 @@ public class Future<T> {
         this.finished.set(false);
         this.hasCalledOnSuccess.set(false);
         this.hasCalledOnFailure.set(false);
-        this.hasCalledOnDone.set(false);
+        this.hasCalledOnComplete.set(false);
         final Future<T> self = this;
         new Thread() {
             public void run() {
@@ -76,6 +76,12 @@ public class Future<T> {
                 self.applyCallback();
             }
         }.start();
+    }
+
+    public boolean retry() {
+        if (!this.finished.get() || this.succeeded.get()) return false;
+        this.run();
+        return true;
     }
 
     public final boolean isDone() {
@@ -96,20 +102,20 @@ public class Future<T> {
         else throw new InterruptedException(String.format("%s has not finished", this));
     }
 
-    public final Future<T> onSuccess(final SuccessCallback<T> callback) {
-        this.callOnSuccess = callback;
+    public final Future<T> onSuccess(final SuccessCallback callback) {
+        this.successCallback = callback;
         this.applyCallback();
         return this;
     }
 
     public final Future<T> onFailure(final FailureCallback callback) {
-        this.callOnFailure = callback;
+        this.failureCallback = callback;
         this.applyCallback();
         return this;
     }
 
-    public final Future<T> onComplete(final CompleteCallback<T> callback) {
-        this.callOnDone = callback;
+    public final Future<T> onComplete(final CompleteCallback callback) {
+        this.completeCallback = callback;
         this.applyCallback();
         return this;
     }
