@@ -68,28 +68,28 @@ class Replica(val arbiter: ActorRef, persistenceProps: Props) extends Actor {
     var succeed = true
     if (persists.contains(seq)) {
       val (sender, id, _) = persists(seq)
-      sender ! OperationFailed(id)
+      if (id >= 0) sender ! OperationFailed(id)
       persists -= seq
       succeed = false
     } else if (replications.contains(seq)) {
       val (sender, id, _) = replications(seq)
-      sender ! OperationFailed(id)
+      if (id >= 0) sender ! OperationFailed(id)
       replications -= seq
       succeed = false
     }
-//    if (!succeed) {
-//      oldValue match {
-//        case Some(value) => self ! Insert(key, value, -seq)
-//        case None => self ! Remove(key, -seq)
-//      }
-//    }
+    if (!succeed) {
+      oldValue match {
+        case Some(value) => self ! Insert(key, value, -seq-1)
+        case None => self ! Remove(key, -seq-1)
+      }
+    }
   }
 
   val leader: Receive = {
     case Insert(key, value, id) =>
       val oldValue = kv.get(key)
       kv += key -> value
-      val seq = nextSeq
+      val seq = if (id >= 0) nextSeq else id
       val persist = Persist(key, Some(value), seq)
       persists += seq -> (sender(), id, persist)
       persistActor ! persist
@@ -104,7 +104,7 @@ class Replica(val arbiter: ActorRef, persistenceProps: Props) extends Actor {
     case Remove(key, id) =>
       val oldValue = kv.get(key)
       kv -= key
-      val seq = nextSeq
+      val seq = if (id >= 0) nextSeq else id
       val persist = Persist(key, None, seq)
       persists += seq -> (sender(), id, persist)
       persistActor ! persist
@@ -132,7 +132,7 @@ class Replica(val arbiter: ActorRef, persistenceProps: Props) extends Actor {
         val replicator = secondaries(replica)
         secondaries -= replica
         replicators -= replicator
-        replicator ! PoisonPill
+        context.stop(replicator)
       }
 
       val newReplicas = replicas -- oldReplicas - self
