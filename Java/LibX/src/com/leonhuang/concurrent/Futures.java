@@ -22,6 +22,20 @@ public class Futures<T> {
         return values;
     }
 
+    public final ConcurrentLinkedQueue<T> getGingerly() {
+        ConcurrentLinkedQueue<T> values = new ConcurrentLinkedQueue<T>();
+        for (Future<T> future : futures) {
+            if (future.isSuccess()) {
+                try {
+                    values.add(future.get());
+                } catch (Exception e) {
+                    throw new RuntimeException("Magic! Burn the sorcerer out!");
+                }
+            }
+        }
+        return values;
+    }
+
     public final Promise<ConcurrentLinkedQueue<T>> promise() {
         final Futures<T> self = this;
         return new Promise<ConcurrentLinkedQueue<T>>() {
@@ -29,6 +43,17 @@ public class Futures<T> {
             public ConcurrentLinkedQueue<T> apply() throws Exception {
                 while (!self.allDone()) Thread.sleep(1);
                 return self.get();
+            }
+        };
+    }
+
+    public final Promise<ConcurrentLinkedQueue<T>> promiseGingerly() {
+        final Futures<T> self = this;
+        return new Promise<ConcurrentLinkedQueue<T>>() {
+            @Override
+            public ConcurrentLinkedQueue<T> apply() throws Exception {
+                while (!self.allDone()) Thread.sleep(1);
+                return self.getGingerly();
             }
         };
     }

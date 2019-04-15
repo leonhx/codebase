@@ -102,6 +102,10 @@ public class Future<T> {
         return this.get();
     }
 
+    public final void waitDone() throws Exception {
+        while (!this.isDone() && this.tryAwait(1000)) ;
+    }
+
     public final boolean tryAwait(long millis) {
         while (millis > 0 && !this.isDone()) {
             try {
