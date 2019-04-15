@@ -1,0 +1,11 @@
+*.swp
+*~
+*.lock
+
+*.o
+*.bin
+*.img
+
+*.zip
+*.rar
+*.tar.*
