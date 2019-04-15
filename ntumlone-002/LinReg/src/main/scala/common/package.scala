@@ -1,6 +1,6 @@
 
 package object common {
-  type Instance = ((Double, Double), Int)
+  type Instance = (Vector[Double], Int)
 
   type DataSet = Vector[Instance]
 
