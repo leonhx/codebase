@@ -45,13 +45,16 @@ int main() {
     fin >> base;
 
     char *str = new char[32];
+    char *raw_str = new char[32];
 
     for (int n = 1; n <= 300; ++n) {
+        int2str(n, base, raw_str);
         int2str(n*n, base, str);
         if (palindromic(str))
-            fout << n << " " << n*n << endl;
+            fout << raw_str << " " << str << endl;
     }
 
+    delete[] raw_str;
     delete[] str;
     return 0;
 }
