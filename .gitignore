@@ -95,3 +95,6 @@ submission/
 
 # Text file
 *.txt
+
+# IDE
+.idea/
