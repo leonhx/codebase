@@ -7,6 +7,7 @@ LANG: C++11
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 #include <map>
 
 using namespace std;
@@ -36,13 +37,14 @@ int main() {
     ifstream fdict ("dict.txt");
     ofstream fout ("namenum.out");
 
-    map<uint64, string> dict;
+    map<uint64, vector<string>> dict;
     string t;
     while (!fdict.eof()) {
         fdict >> t;
         uint64 key = str2key(t);
-        if (key != 0)
-            dict[key] = t;
+        if (key != 0) {
+            dict[key].push_back(t);
+        }
     }
 
     uint64 key;
@@ -52,7 +54,10 @@ int main() {
     if (it == dict.end()) {
         fout << NONE << endl;
     } else {
-        fout << it->second << endl;
+        auto values = it->second;
+        for (auto i = values.begin(); i != values.end(); ++i) {
+            fout << *i << endl;
+        }
     }
 
     return 0;
