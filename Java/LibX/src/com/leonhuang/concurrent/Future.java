@@ -89,7 +89,7 @@ public class Future<T> {
     public final T get() throws Exception {
         if (this.isSuccess()) return this.result.get();
         else if (this.isFailure()) throw error.get();
-        else throw new RuntimeException(String.format("%s has not finished", this));
+        else throw new RuntimeException(String.format("%s has not finished yet", this));
     }
 
     public final T waitThenGet(long millis) throws Exception {
@@ -102,7 +102,7 @@ public class Future<T> {
         return this.get();
     }
 
-    public final void waitDone() throws Exception {
+    public final void waitDone() {
         while (!this.isDone() && this.tryAwait(1000)) ;
     }
 
