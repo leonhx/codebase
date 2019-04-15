@@ -86,7 +86,7 @@ def q16():
     X, y = load_train()
     import multiprocessing as par
     pool = par.Pool(processes=par.cpu_count())
-    R = 3
+    R = 100
     res = pool.map(q16_print_ein, [(X, y)] * R)
     print '-' * 6
     print '- q16:', sum([e[0] for e in res]) * 1.0 / len(res)
@@ -117,7 +117,7 @@ def q19():
     X, y = load_train()
     import multiprocessing as par
     pool = par.Pool(processes=par.cpu_count())
-    R = 3
+    R = 100
     res = pool.map(q19_print_ein, [(X, y)] * R)
     print '-' * 6
     print '- q19:', sum([e[0] for e in res]) * 1.0 / len(res)
