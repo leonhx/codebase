@@ -8,7 +8,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 
 def load_dataset():
-    dataset = np.loadtxt('/Users/leon/Developer/codebase/ntumltwo-001/hw2_lssvm_all.dat')
+    dataset = np.loadtxt('hw2_lssvm_all.dat')
     Nt = 400
     D_train = dataset[:Nt]
     D_test = dataset[Nt:]
@@ -109,6 +109,36 @@ def q20():
             print gamma, lamda, err / len(X_test)
 
 
+def _q19():
+    import mlpy
+    X_train, y_train, X_test, y_test = load_dataset()
+    for gamma in [32, 2, 0.125]:
+        rbf = mlpy.KernelGaussian(sigma=(2 * gamma) ** 0.5)
+        for lamda in [0.001, 1, 1000]:
+            clf = mlpy.KernelRidge(lmb=lamda, kernel=rbf)
+            clf.learn(X_train, y_train)
+            err = 0.0
+            for i in xrange(len(X_train)):
+                if sign(clf.pred(X_train[i])) != y_train[i]:
+                    err += 1.0
+            print gamma, lamda, err / len(X_train)
+
+
+def _q20():
+    import mlpy
+    X_train, y_train, X_test, y_test = load_dataset()
+    for gamma in [32, 2, 0.125]:
+        rbf = mlpy.KernelGaussian(sigma=(2 * gamma) ** 0.5)
+        for lamda in [0.001, 1, 1000]:
+            clf = mlpy.KernelRidge(lmb=lamda, kernel=rbf)
+            clf.learn(X_train, y_train)
+            err = 0.0
+            for i in xrange(len(X_test)):
+                if sign(clf.pred(X_test[i])) != y_test[i]:
+                    err += 1.0
+            print gamma, lamda, err / len(X_test)
+
+
 if __name__ == '__main__':
     # print '===q12==='
     # q12()
@@ -125,7 +155,6 @@ if __name__ == '__main__':
     # print '===q18==='
     # q18()
     print '===q19==='
-    q19()
+    _q19()
     print '===q20==='
-    q20()
-
+    _q20()
