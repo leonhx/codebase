@@ -1,19 +1,24 @@
 #include <cstdio>
 #include <stack>
-#include <vector>
+#include <queue>
 
 using namespace std;
 
+struct Area {
+    int s;
+    int e;
+    int area;
+    Area(int _s, int _e) : s(_s), e(_e), area(_e - _s) {}
+};
+
 stack<int> stk;
-vector<int> areas;
+queue<Area> areas;
 
 int main()
 {
     int ch;
     int sum = 0;
     int current_point = 0;
-    int area = 0;
-    int last_s = 0, last_e = 0;
     while ((ch = getchar()) && ch != '\n' && ch != EOF)
     {
         switch (ch)
@@ -26,14 +31,19 @@ int main()
                 {
                     int p = stk.top();
                     stk.pop();
-                    area += current_point - p;
-                    if (p >= last_s || last_e >= current_point) {
-                        sum += area;
-                        areas.push_back(area);
-                        area = 0;
+                    Area area(p, current_point);
+                    sum += area.area;
+                    int size = areas.size();
+                    while (size-- > 0)
+                    {
+                        Area a = areas.front();
+                        areas.pop();
+                        if (area.s < a.s && a.e < area.e)
+                            area.area += a.area;
+                        else
+                            areas.push(a);
                     }
-                    last_s = p;
-                    last_e = current_point;
+                    areas.push(area);
                 }
                 break;
         }
@@ -42,8 +52,12 @@ int main()
 
     printf("%d\n", sum);
     printf("%d", areas.size());
-    for (int i = 0; i < areas.size(); ++i)
-        printf(" %d", areas[i]);
+    while (!areas.empty())
+    {
+        Area a = areas.front();
+        areas.pop();
+        printf(" %d", a.area);
+    }
     putchar('\n');
     return 0;
 }
