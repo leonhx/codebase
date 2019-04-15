@@ -17,6 +17,7 @@ class Bagging(object):
 
     def fit(self, X, y):
         self.models = [self.__fit_one__(X, y) for _ in xrange(self.T)]
+        self.ein = sum([m.ein for m in self.models]) / self.T
 
     def __predict__(self, x):
         results = [m.__predict__(x) for m in self.models]
