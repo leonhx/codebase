@@ -30,7 +30,7 @@ class SparseGraph(dict):
                 raise AttributeError('%r not in nodes list' % n)
             super(SparseGraph, self).__getitem__(n1).add(n)
 
-    def sort(self, beta):
+    def sort(self, beta, max_iter=None, tolerance=1e-4):
         pass
 
 
