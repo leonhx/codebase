@@ -82,3 +82,7 @@ docs/_build/
 
 # Java
 *.class
+.classpath
+.settings/
+*.zip
+
