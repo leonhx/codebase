@@ -1,28 +1,22 @@
 import numpy as np
-import multiprocessing as par
-
-
-def fit_one(param):
-    bag, X, y = param
-    return bag.__fit_one__(X, y)
 
 
 class Bagging(object):
 
-    def __init__(self, get_model, size, T):
+    def __init__(self, get_model, sample_size=1.0, T=10):
         self.get_model = get_model
-        self.size = size
+        self.sample_size = sample_size
         self.T = T
 
     def __fit_one__(self, X, y):
         model = self.get_model()
-        indices = np.random.random_integers(0, len(X) - 1, self.size)
+        indices = np.random.random_integers(0, len(X) - 1,
+                                            int(self.sample_size * len(X)))
         model.fit(X[indices], y[indices])
         return model
 
     def fit(self, X, y):
-        pool = par.Pool(processes=par.cpu_count())
-        self.models = pool.map(fit_one, ((self, X, y),) * self.T)
+        self.models = [self.__fit_one__(X, y) for _ in xrange(self.T)]
 
     def __predict__(self, x):
         results = [m.__predict__(x) for m in self.models]
@@ -32,3 +26,6 @@ class Bagging(object):
     def predict(self, X):
         return np.apply_along_axis(lambda x: self.__predict__(x),
                                    axis=1, arr=X)
+
+    def score(self, X, y):
+        return sum([m.score(X, y) for m in self.models]) / self.T
