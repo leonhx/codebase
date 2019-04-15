@@ -11,9 +11,9 @@ def gini(y):
 
 class DecisionTree(object):
 
-    def __init__(self, impurity=gini, pruning=False):
+    def __init__(self, impurity=gini, depth=None):
         self.impurity = gini
-        self.pruning = pruning
+        self.depth = depth
 
     def __branching__(self, X, y):
         """return (i, theta, min_impurity_val)"""
@@ -42,15 +42,17 @@ class DecisionTree(object):
         left_cond = X[:, self.i] < self.theta
         right_cond = X[:, self.i] > self.theta
         if (min_impurity_val == 0 or np.sum(left_cond) == 0
-                or np.sum(right_cond) == 0):
+                or np.sum(right_cond) == 0 or
+                (self.depth is not None and self.depth <= 1)):
             self.is_leaf = True
             uniq_y = np.unique(y)
             y_counts = [(k, np.sum(y == k)) for k in uniq_y]
             self.y = max(y_counts, key=lambda e: e[1])[0]
             return
-        self.left = DecisionTree(self.impurity, self.pruning)
+        new_depth = self.depth - 1 if self.depth is not None else None
+        self.left = DecisionTree(self.impurity, new_depth)
         self.left.fit(X[left_cond], y[left_cond])
-        self.right = DecisionTree(self.impurity, self.pruning)
+        self.right = DecisionTree(self.impurity, new_depth)
         self.right.fit(X[right_cond], y[right_cond])
 
     def __predict__(self, x):
@@ -87,8 +89,8 @@ if __name__ == '__main__':
     X = np.array([[1, 1], [1, 2], [1, 3],
                   [2, 1], [2, 2], [2, 2],
                   [3, 1], [3, 2], [3, 3]])
-    y = np.array([1, -1, -1, 1, 1, -1, 1, 1, -1])
-    dt = DecisionTree()
+    y = np.array([1, -1, -1, 1, 1, -1, -1, 1, -1])
+    dt = DecisionTree(depth=2)
     dt.fit(X, y)
     print dt.predict(X)
     print dt.__prepr__()
