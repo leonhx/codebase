@@ -1,4 +1,4 @@
-enjoy-coding
+Enjoy Coding
 ============
 
-Enjoy coding.
+It's fun!
