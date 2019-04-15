@@ -1,21 +1,19 @@
 package suggestions
 package gui
 
-import scala.collection.mutable.ListBuffer
-import scala.collection.JavaConverters._
-import scala.concurrent._
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.swing._
-import scala.util.{ Try, Success, Failure }
-import scala.swing.event._
-import swing.Swing._
 import javax.swing.UIManager
-import Orientation._
-import rx.subscriptions.CompositeSubscription
-import rx.lang.scala.Observable
-import rx.lang.scala.Subscription
-import observablex._
-import search._
+
+import rx.lang.scala.{Observable, Subscription}
+import scala.concurrent.ExecutionContext.Implicits.global
+import suggestions.observablex._
+import suggestions.search._
+
+import scala.collection.mutable.ListBuffer
+import scala.swing.Orientation._
+import scala.swing.Swing._
+import scala.swing._
+import scala.swing.event._
+import scala.util.{Failure, Success, Try}
 
 object WikipediaSuggest extends SimpleSwingApplication with ConcreteSwingApi with ConcreteWikipediaApi {
 
@@ -81,25 +79,31 @@ object WikipediaSuggest extends SimpleSwingApplication with ConcreteSwingApi wit
      */
 
     // TO IMPLEMENT
-    val searchTerms: Observable[String] = ???
+    val searchTerms: Observable[String] = searchTermField.textValues
 
     // TO IMPLEMENT
-    val suggestions: Observable[Try[List[String]]] = ???
+    val suggestions: Observable[Try[List[String]]] = searchTerms.flatMap(wikiSuggestResponseStream(_).recovered)
 
     // TO IMPLEMENT
-    val suggestionSubscription: Subscription =  suggestions.observeOn(eventScheduler) subscribe {
-      x => ???
+    val suggestionSubscription: Subscription =  suggestions.observeOn(eventScheduler) subscribe { x =>
+      x match {
+        case Success(l) => suggestionList.listData = l
+        case Failure(e) => status.text = e.getMessage
+      }
     }
 
     // TO IMPLEMENT
-    val selections: Observable[String] = ???
+    val selections: Observable[String] = button.clicks.map(_ => suggestionList.selection.items.head)
 
     // TO IMPLEMENT
-    val pages: Observable[Try[String]] = ???
+    val pages: Observable[Try[String]] = selections.flatMap(term => ObservableEx(wikipediaPage(term)).timedOut(5L).recovered )
 
     // TO IMPLEMENT
-    val pageSubscription: Subscription = pages.observeOn(eventScheduler) subscribe {
-      x => ???
+    val pageSubscription: Subscription = pages.observeOn(eventScheduler) subscribe { x =>
+      x match {
+        case Success(p) => editorpane.text = p
+        case Failure(e) => status.text = e.getMessage
+      }
     }
 
   }
