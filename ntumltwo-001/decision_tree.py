@@ -53,7 +53,7 @@ class DecisionTree(object):
         self.right = DecisionTree(self.impurity, new_depth)
         self.right.fit(X[right_cond], y[right_cond])
         self.node_count = self.left.node_count + self.right.node_count + 1
-        self.ein = np.sum(self.predict(X) != y) * 1.0 / len(y)
+        self.ein = self.error(X, y)
 
     def __predict__(self, x):
         if self.is_leaf:
@@ -83,6 +83,9 @@ class DecisionTree(object):
     def predict(self, X):
         return np.apply_along_axis(lambda x: self.__predict__(x),
                                    axis=1, arr=X)
+
+    def error(self, X, y):
+        return np.sum(self.predict(X) != y) * 1.0 / len(y)
 
 
 if __name__ == '__main__':
