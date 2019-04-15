@@ -14,4 +14,9 @@ myLength (_ : xs) = 1 + myLength xs
 prop_myLength xs = myLength xs == length xs
 
 
-main = $(quickCheckAll)
+return []
+runTests = $quickCheckAll
+
+
+main = do
+    runTests

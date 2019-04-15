@@ -12,7 +12,12 @@ elementAt (x : _) 0 = x
 elementAt (_ : xs) k = elementAt xs (k - 1)
 
 
-prop_elementAt xs k = elementAt xs k == xs !! k
+prop_elementAt xs k = length xs > k && k >= 0 ==> elementAt xs k == xs !! k
 
 
-main = $(quickCheckAll)
+return []
+runTests = $quickCheckAll
+
+
+main = do
+    runTests

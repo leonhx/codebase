@@ -10,8 +10,13 @@ isPalindrome :: (Eq a) => [a] -> Bool
 isPalindrome xs = reverse xs == xs
 
 
-prop_isPalindrome xs = reverse xs == xs ==> isPalindrome xs == True
+prop_isPalindrome xs = isPalindrome (xs ++ reverse xs) == True
 prop_isNotPalindrome xs = reverse xs /= xs ==> isPalindrome xs == False
 
 
-main = $(quickCheckAll)
+return []
+runTests = $quickCheckAll
+
+
+main = do
+    runTests

@@ -11,7 +11,12 @@ myLast [x] = x
 myLast (_:xs) = myLast xs
 
 
-prop_myLast xs = myLast xs == last xs
+prop_myLast xs = not (null xs) ==> myLast xs == last xs
 
 
-main = $(quickCheckAll)
+return []
+runTests = $quickCheckAll
+
+
+main = do
+    runTests

@@ -13,7 +13,13 @@ myButLast [x, _] = x
 myButLast (_ : xs) = myButLast xs
 
 
-prop_myLast xs = myButLast xs == xs !! (length xs - 2)
+prop_myLast xs = length xs >= 2 ==> myButLast xs == xs !! (length xs - 2)
 
 
-main = $(quickCheckAll)
+return []
+runTests = $quickCheckAll
+
+
+main = do
+    runTests
+
