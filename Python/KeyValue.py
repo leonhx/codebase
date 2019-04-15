@@ -3,7 +3,7 @@ A class that can store key-value pairs.
 """
 
 
-class KeyValue():
+class KeyValue(object):
     """Store key-value pairs, of which the key is a string.
 
     **NOTE** The key cannot start with an underline unless it is
