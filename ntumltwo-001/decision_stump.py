@@ -19,11 +19,9 @@ class DecisionStump(object):
         self.theta = None
         self.err_ = None
 
-
     def __repr__(self):
         return 'DecisionDump(u=%s, s=%s, i=%s, theta=%s, err_=%s)' % (
             self.u, self.s, self.i, self.theta, self.err_)
-
 
     def fit(self, X, y):
         N, d = X.shape
@@ -54,10 +52,8 @@ class DecisionStump(object):
                         self.s = s
                         self.theta = theta
 
-
     def predict(self, x):
         return self.s * sign(x[self.i] - self.theta)
-
 
     def score(self, X, y):
         x = X[:, self.i]
