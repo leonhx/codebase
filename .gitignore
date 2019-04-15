@@ -79,6 +79,7 @@ docs/_build/
 *.tmp
 *.temp
 *.in
+*.bak
 
 # Java
 *.class
