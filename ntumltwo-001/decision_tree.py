@@ -61,9 +61,8 @@ class DecisionTree(object):
             return self.y
         if x[self.i] < self.theta:
             return self.left.__predict__(x)
-        elif x[self.i] > self.theta:
+        else:
             return self.right.__predict__(x)
-        raise UserWarning('no such condition')
 
     def __prepr__(self, indent=0):
         class_name = self.__class__.__name__
