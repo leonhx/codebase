@@ -29,21 +29,22 @@ class DecisionTree(object):
                     result = (i, theta, impurity_val)
         return result
 
-    def __make_leaf__(self, y):
+    def __make_leaf__(self, X, y):
         self.is_leaf = True
         self.node_count = 0
         uniq_y = np.unique(y)
         y_counts = [(k, np.sum(y == k)) for k in uniq_y]
         self.y = max(y_counts, key=lambda e: e[1])[0]
+        self.ein = self.error(X, y)
 
     def fit(self, X, y):
         if (self.impurity(y) < 1e-4 or
                 (self.depth is not None and self.depth <= 1)):
-            return self.__make_leaf__(y)
+            return self.__make_leaf__(X, y)
         self.is_leaf = False
         branch_cond = self.__branching__(X, y)
         if branch_cond is None:
-            return self.__make_leaf__(y)
+            return self.__make_leaf__(X, y)
         self.i, self.theta, min_impurity_val = branch_cond
         left_cond = X[:, self.i] < self.theta
         right_cond = X[:, self.i] > self.theta
