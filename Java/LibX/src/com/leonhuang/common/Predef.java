@@ -1,6 +1,7 @@
 package com.leonhuang.common;
 
 import com.leonhuang.concurrent.Future;
+import com.leonhuang.concurrent.Futures;
 import com.leonhuang.concurrent.Promise;
 
 public class Predef {
@@ -16,12 +17,17 @@ public class Predef {
         return promise.future();
     }
 
-    public static <T> Function1<T, T> identity() {
-        return new Function1<T, T>() {
+    public static <T> Func1<T, T> identity() {
+        return new Func1<T, T>() {
             @Override
             public T apply(T value) {
                 return value;
             }
         };
     }
+
+    public static <T> Futures<T> futures() {
+        return new Futures<T>();
+    }
+
 }

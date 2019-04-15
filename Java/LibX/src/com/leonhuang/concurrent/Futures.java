@@ -9,21 +9,9 @@ public class Futures<T> {
         futures = new ConcurrentLinkedQueue<Future<T>>();
     }
 
-    public Futures<T> append(Future<T> future) {
+    public Futures<T> add(Future<T> future) {
         futures.add(future);
         return this;
-    }
-
-    public final boolean tryAwait(long millis) {
-        while (millis > 0 && !this.allDone()) {
-            try {
-                Thread.sleep(1);
-                millis--;
-            } catch (InterruptedException e) {
-                return false;
-            }
-        }
-        return this.allDone();
     }
 
     public final ConcurrentLinkedQueue<T> get() throws Exception {
@@ -34,18 +22,27 @@ public class Futures<T> {
         return values;
     }
 
-    public Future<Futures<T>> future() {
+    public final Promise<ConcurrentLinkedQueue<T>> promise() {
         final Futures<T> self = this;
-        return new Promise<Futures<T>>() {
+        return new Promise<ConcurrentLinkedQueue<T>>() {
             @Override
-            public Futures<T> run() throws Exception {
-                while (!self.allDone()) self.tryAwait(1000);
-                return self;
+            public ConcurrentLinkedQueue<T> apply() throws Exception {
+                while (!self.allDone()) Thread.sleep(1);
+                return self.get();
             }
-        }.future();
+        };
+    }
+
+    public final int size() {
+        return futures.size();
+    }
+
+    public final boolean isEmpty() {
+        return futures.isEmpty();
     }
 
     public final boolean allDone() {
+        if (isEmpty()) return false;
         for (Future<T> future : futures) {
             if (!future.isDone())
                 return false;
@@ -54,6 +51,7 @@ public class Futures<T> {
     }
 
     public final boolean anyDone() {
+        if (isEmpty()) return false;
         for (Future<T> future : futures) {
             if (future.isDone())
                 return true;
@@ -62,6 +60,7 @@ public class Futures<T> {
     }
 
     public final boolean allSuccess() {
+        if (isEmpty()) return false;
         for (Future<T> future : futures) {
             if (!future.isSuccess())
                 return false;
@@ -70,6 +69,7 @@ public class Futures<T> {
     }
 
     public final boolean anySuccess() {
+        if (isEmpty()) return false;
         for (Future<T> future : futures) {
             if (future.isSuccess())
                 return true;
@@ -78,6 +78,7 @@ public class Futures<T> {
     }
 
     public final boolean allFailure() {
+        if (isEmpty()) return false;
         for (Future<T> future : futures) {
             if (!future.isFailure())
                 return false;
@@ -86,10 +87,38 @@ public class Futures<T> {
     }
 
     public final boolean anyFailure() {
+        if (isEmpty()) return false;
         for (Future<T> future : futures) {
             if (future.isFailure())
                 return true;
         }
         return false;
+    }
+
+    public final int countDone() {
+        int count = 0;
+        for (Future<T> future : futures) {
+            if (future.isDone())
+                count++;
+        }
+        return count;
+    }
+
+    public final int countSuccess() {
+        int count = 0;
+        for (Future<T> future : futures) {
+            if (future.isSuccess())
+                count++;
+        }
+        return count;
+    }
+
+    public final int countFailure() {
+        int count = 0;
+        for (Future<T> future : futures) {
+            if (future.isFailure())
+                count++;
+        }
+        return count;
     }
 }
