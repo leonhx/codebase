@@ -10,6 +10,8 @@ TASK: $task
 */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 int main() {
     FILE *fin  = fopen("$task.in", "r");
