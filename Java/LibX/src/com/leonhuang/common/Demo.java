@@ -17,5 +17,6 @@ public class Demo {
         System.out.println(a.equals(a));
         System.out.println(a.equals(a1));
         System.out.println(a.equals(b));
+        System.out.println(Predef.identity().apply(a1).getClass());
     }
 }

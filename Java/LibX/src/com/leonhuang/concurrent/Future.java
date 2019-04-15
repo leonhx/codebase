@@ -2,37 +2,23 @@ package com.leonhuang.concurrent;
 
 import com.leonhuang.common.Either;
 import com.leonhuang.common.Function1;
+import com.leonhuang.common.FunctionVoid0;
+import com.leonhuang.common.FunctionVoid1;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Future<T> {
-    public interface SuccessCallback<T> {
-        public abstract void apply(T value);
-    }
-
-    public interface FailureCallback {
-        public abstract void apply(Exception error);
-    }
-
-    public interface CompleteCallback {
-        public abstract void apply();
-    }
-
-    public interface MapFunction<T, R> {
-        public abstract R apply(T value) throws Exception;
-    }
-
     private final Promise<T> promise;
     private final AtomicBoolean finished = new AtomicBoolean();
     private final AtomicBoolean succeeded = new AtomicBoolean();
     private final AtomicReference<T> result = new AtomicReference<T>();
     private final AtomicReference<Exception> error = new AtomicReference<Exception>();
-    private SuccessCallback<T> successCallback;
+    private FunctionVoid1<T> successCallback;
     private final AtomicBoolean hasCalledOnSuccess = new AtomicBoolean();
-    private FailureCallback failureCallback;
+    private FunctionVoid1<Exception> failureCallback;
     private final AtomicBoolean hasCalledOnFailure = new AtomicBoolean();
-    private CompleteCallback completeCallback;
+    private FunctionVoid0 completeCallback;
     private final AtomicBoolean hasCalledOnComplete = new AtomicBoolean();
 
     protected Future(final Promise<T> p) {
@@ -121,25 +107,25 @@ public class Future<T> {
         return this.isDone();
     }
 
-    public final Future<T> onSuccess(final SuccessCallback<T> callback) {
+    public final Future<T> onSuccess(final FunctionVoid1<T> callback) {
         this.successCallback = callback;
         this.applyCallback();
         return this;
     }
 
-    public final Future<T> onFailure(final FailureCallback callback) {
+    public final Future<T> onFailure(final FunctionVoid1<Exception> callback) {
         this.failureCallback = callback;
         this.applyCallback();
         return this;
     }
 
-    public final Future<T> onComplete(final CompleteCallback callback) {
+    public final Future<T> onComplete(final FunctionVoid0 callback) {
         this.completeCallback = callback;
         this.applyCallback();
         return this;
     }
 
-    public final <R> Future<R> map(final MapFunction<T, R> func) {
+    public final <R> Future<R> map(final Function1<T, R> func) {
         final Future<T> self = this;
         return new Promise<R>() {
             @Override
@@ -156,7 +142,7 @@ public class Future<T> {
         }.future();
     }
 
-    public final <R> R flatMap(final MapFunction<T, R> func) throws Exception {
+    public final <R> R flatMap(final Function1<T, R> func) throws Exception {
         final Future<R> mappedResult = this.map(func);
         while (!mappedResult.isDone() && mappedResult.tryAwait(1000)) ;
         return mappedResult.get();
