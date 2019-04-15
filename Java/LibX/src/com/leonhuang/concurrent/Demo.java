@@ -17,34 +17,34 @@ public class Demo {
             }
         };
         final Future<Integer> f = p.future();
-        final Future<Integer> f1 = f.map(new Function1<Integer, Integer>() {
+        final Future<Integer> f1 = f.map(new Future.MapFunction<Integer, Integer>() {
             @Override
             public Integer apply(Integer integer) {
                 return integer + 1;
             }
         });
         System.out.println("in main1");
-        f.onSuccess(f.new SuccessCallback() {
+        f.onSuccess(new Future.SuccessCallback<Integer>() {
             @Override
             public void apply(Integer integer) {
                 System.out.println("f");
                 System.out.println(integer);
             }
-        }).onFailure(f.new FailureCallback() {
+        }).onFailure(new Future.FailureCallback() {
             @Override
             public void apply(Exception e) {
                 System.out.println("onFailure");
                 if (e instanceof ArithmeticException)
                     e.printStackTrace();
             }
-        }).onComplete(f.new CompleteCallback() {
+        }).onComplete(new Future.CompleteCallback() {
             @Override
             public void apply() {
                 System.out.println("onComplete");
             }
         });
         System.out.println("in main2");
-        f1.onSuccess(f1.new SuccessCallback() {
+        f1.onSuccess(new Future.SuccessCallback<Integer>() {
             @Override
             public void apply(Integer value) {
                 System.out.println("f1");
@@ -52,7 +52,7 @@ public class Demo {
             }
         });
         System.out.println("in main3");
-        System.out.println(f.flatMap(new Function1<Integer, Integer>() {
+        System.out.println(f.flatMap(new Future.MapFunction<Integer, Integer>() {
             @Override
             public Integer apply(Integer integer) {
                 return integer * 2;

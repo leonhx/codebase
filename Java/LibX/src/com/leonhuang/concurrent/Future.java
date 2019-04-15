@@ -7,16 +7,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Future<T> {
-    public abstract class SuccessCallback {
+    public interface SuccessCallback<T> {
         public abstract void apply(T value);
     }
 
-    public abstract class FailureCallback {
+    public interface FailureCallback {
         public abstract void apply(Exception error);
     }
 
-    public abstract class CompleteCallback {
+    public interface CompleteCallback {
         public abstract void apply();
+    }
+
+    public interface MapFunction<T, R> {
+        public abstract R apply(T value) throws Exception;
     }
 
     private final Promise<T> promise;
@@ -24,7 +28,7 @@ public class Future<T> {
     private final AtomicBoolean succeeded = new AtomicBoolean();
     private final AtomicReference<T> result = new AtomicReference<T>();
     private final AtomicReference<Exception> error = new AtomicReference<Exception>();
-    private SuccessCallback successCallback;
+    private SuccessCallback<T> successCallback;
     private final AtomicBoolean hasCalledOnSuccess = new AtomicBoolean();
     private FailureCallback failureCallback;
     private final AtomicBoolean hasCalledOnFailure = new AtomicBoolean();
@@ -117,7 +121,7 @@ public class Future<T> {
         return this.isDone();
     }
 
-    public final Future<T> onSuccess(final SuccessCallback callback) {
+    public final Future<T> onSuccess(final SuccessCallback<T> callback) {
         this.successCallback = callback;
         this.applyCallback();
         return this;
@@ -135,7 +139,7 @@ public class Future<T> {
         return this;
     }
 
-    public final <R> Future<R> map(final Function1<T, R> func) {
+    public final <R> Future<R> map(final MapFunction<T, R> func) {
         final Future<T> self = this;
         return new Promise<R>() {
             @Override
@@ -152,7 +156,7 @@ public class Future<T> {
         }.future();
     }
 
-    public final <R> R flatMap(final Function1<T, R> func) throws Exception {
+    public final <R> R flatMap(final MapFunction<T, R> func) throws Exception {
         final Future<R> mappedResult = this.map(func);
         while (!mappedResult.isDone() && mappedResult.tryAwait(1000)) ;
         return mappedResult.get();
