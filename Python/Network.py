@@ -34,6 +34,7 @@ def retry(exceptions, extra_cond=None, delay=None):
     import time
     if not delay:
         delay = lambda err, i: 0
+
     def __safe__(func):
         def __bar__(*args, **kwargs):
             i = 0
