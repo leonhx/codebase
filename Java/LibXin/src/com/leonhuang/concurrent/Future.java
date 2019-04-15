@@ -1,22 +1,31 @@
 package com.leonhuang.concurrent;
 
 import com.leonhuang.common.Either;
-import com.leonhuang.common.Function1;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Future<T> {
+    public interface SuccessCallback<T> {
+        public void apply(T value);
+    }
+    public interface FailureCallback {
+        public void apply(Exception error);
+    }
+    public interface CompleteCallback<T> {
+        public void apply(Either<T, Exception> result);
+    }
+
     private final Promise<T> promise;
     private final AtomicBoolean finished = new AtomicBoolean();
     private final AtomicBoolean succeeded = new AtomicBoolean();
     private final AtomicReference<T> result = new AtomicReference<T>();
     private final AtomicReference<Exception> error = new AtomicReference<Exception>();
-    private Function1<T, Void> callOnSuccess;
+    private SuccessCallback<T> callOnSuccess;
     private final AtomicBoolean hasCalledOnSuccess = new AtomicBoolean();
-    private Function1<Exception, Void> callOnFailure;
+    private FailureCallback callOnFailure;
     private final AtomicBoolean hasCalledOnFailure = new AtomicBoolean();
-    private Function1<Either<T, Exception>, Void> callOnDone;
+    private CompleteCallback<T> callOnDone;
     private final AtomicBoolean hasCalledOnDone = new AtomicBoolean();
 
     protected Future(final Promise<T> p) {
@@ -87,20 +96,20 @@ public class Future<T> {
         else throw new InterruptedException(String.format("%s has not finished", this));
     }
 
-    public final Future<T> onSuccess(final Function1<T, Void> func) {
-        this.callOnSuccess = func;
+    public final Future<T> onSuccess(final SuccessCallback<T> callback) {
+        this.callOnSuccess = callback;
         this.applyCallback();
         return this;
     }
 
-    public final Future<T> onFailure(final Function1<Exception, Void> func) {
-        this.callOnFailure = func;
+    public final Future<T> onFailure(final FailureCallback callback) {
+        this.callOnFailure = callback;
         this.applyCallback();
         return this;
     }
 
-    public final Future<T> onComplete(final Function1<Either<T, Exception>, Void> func) {
-        this.callOnDone = func;
+    public final Future<T> onComplete(final CompleteCallback<T> callback) {
+        this.callOnDone = callback;
         this.applyCallback();
         return this;
     }
