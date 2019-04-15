@@ -27,16 +27,18 @@ abstract class QuickCheckHeap extends Properties("Heap") with IntHeap {
     isEmpty(deleteMin(h))
   }
 
-  property("heapsort") = forAll { h: H =>
+  property("heapsort") = forAll { xs: List[Int] =>
+    def genH(xs: List[A], h: H): H = xs match {
+      case Nil => h
+      case x :: xs_ => genH(xs_, insert(x, h))
+    }
+    val h = genH(xs, empty)
     def heapSort(h: H): List[A] =
       if (isEmpty(h)) Nil
       else findMin(h) :: heapSort(deleteMin(h))
-    val sorted = heapSort(h)
-    def checkOrder(a: A, arr: List[A]): Boolean = arr match {
-      case x :: xs => a <= x && checkOrder(x, xs)
-      case _ => true
-    }
-    checkOrder(sorted.head, sorted.tail)
+    val heapSorted = heapSort(h)
+    val stdSorted = xs.sorted
+    heapSorted.zip(stdSorted).forall{case (x1, x2) => x1 == x2}
   }
 
   property("meld") = forAll { (h1: H, h2: H) =>
