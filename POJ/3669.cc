@@ -2,6 +2,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <queue>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -13,13 +15,23 @@ struct Point
     Point(int _x, int _y) : x(_x), y(_y) {}
 };
 
+struct PointT
+{
+    Point p;
+    int t;
+    PointT() : p(), t(0) {}
+    PointT(Point _p, int _t) : p(_p), t(_t) {}
+};
+
 int lattice[320][320];
 queue<Point> ps;
-char dir[][2] = {{-1, 0}, {0, 1}, {0, -1}, {1, 0}};
+char dir[][2] = {{ -1, 0}, {0, 1}, {0, -1}, {1, 0}};
 
-void bfs() {
+void bfs()
+{
     int size = ps.size();
-    while (size-- > 0) {
+    while (size-- > 0)
+    {
         Point p = ps.front();
         ps.pop();
         int t = lattice[p.x][p.y];
@@ -30,13 +42,16 @@ void bfs() {
             int nx = p.x + dir[i][0], ny = p.y + dir[i][1];
             if (nx < 0 || nx >= 320 || ny < 0 || ny >= 320)
                 continue;
-            if (lattice[nx][ny] == -1) {
+            if (lattice[nx][ny] == -1)
+            {
                 lattice[nx][ny] = t + 1;
                 ps.push(Point(nx, ny));
             }
         }
     }
 }
+
+bool cmp(PointT pt1, PointT pt2) { return pt1.t < pt2.t; }
 
 int main(int argc, char const *argv[])
 {
@@ -46,6 +61,14 @@ int main(int argc, char const *argv[])
 
     int M;
     scanf("%d\n", &M);
+    vector<PointT> pts;
+    for (int i = 0; i < M; ++i)
+    {
+        int x, y, t;
+        scanf("%d %d %d\n", &x, &y, &t);
+        pts.push_back(PointT(Point(x, y), t));
+    }
+    sort(pts.begin(), pts.end(), cmp);
 
     int last_t = 0;
     int t;
@@ -53,8 +76,8 @@ int main(int argc, char const *argv[])
     {
         if (ps.empty())
             break;
-        Point p;
-        scanf("%d %d %d\n", &(p.x), &(p.y), &t);
+        Point p = pts[i].p;
+        int t = pts[i].t;
         for (int j = last_t; j < t; ++j)
             bfs();
         lattice[p.x][p.y] = -2;
@@ -73,7 +96,7 @@ int main(int argc, char const *argv[])
     for (int i = 0; i < 320; ++i)
         for (int j = 0; j < 320; ++j)
             if (lattice[i][j] >= 0 && lattice[i][j] < min_t)
-                lattice[i][j] = min_t;
+                min_t = lattice[i][j];
 
     if (min_t > 1000)
         min_t = -1;
