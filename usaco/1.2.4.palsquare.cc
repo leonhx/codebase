@@ -25,6 +25,18 @@ void int2str(int n, int base, char *str) {
     str[i] = '\0';
 }
 
+void strrev(char *str) {
+    int len = strlen(str);
+    int i = 0, j = len - 1;
+    while (i < j) {
+        char t = str[j];
+        str[j] = str[i];
+        str[i] = t;
+        i++;
+        j--;
+    }
+}
+
 bool palindromic(char *str) {
     int len = strlen(str);
     int i = 0, j = len - 1;
@@ -49,6 +61,7 @@ int main() {
 
     for (int n = 1; n <= 300; ++n) {
         int2str(n, base, raw_str);
+        strrev(raw_str);
         int2str(n*n, base, str);
         if (palindromic(str))
             fout << raw_str << " " << str << endl;
