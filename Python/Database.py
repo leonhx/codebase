@@ -5,6 +5,7 @@ Utilities about database.
 from contextlib import contextmanager
 import MySQLdb
 
+
 @contextmanager
 def connect(host, user, passwd, database, charset='utf8'):
     """
