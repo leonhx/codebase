@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+task=$1
+
+cat << --- >> $task.c
+/*
+ID: xerxes.1
+LANG: C
+TASK: $task
+*/
+
+#include <stdio.h>
+
+int main() {
+    FILE *fin  = fopen("$task.in", "r");
+    FILE *fout = fopen("$task.out", "w");
+
+    return 0;
+}
+---
