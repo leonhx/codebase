@@ -1,9 +1,6 @@
 package kvstore
 
-import akka.actor.Props
-import akka.actor.Actor
-import akka.actor.ActorRef
-import scala.concurrent.duration._
+import akka.actor.{Actor, ActorRef, Props}
 
 object Replicator {
   case class Replicate(key: String, valueOption: Option[String], id: Long)
@@ -17,9 +14,9 @@ object Replicator {
 
 class Replicator(val replica: ActorRef) extends Actor {
   import Replicator._
-  import Replica._
-  import context.dispatcher
-  
+  import scala.concurrent.duration._
+  import scala.concurrent.ExecutionContext.Implicits.global
+
   /*
    * The contents of this actor is just a suggestion, you can implement it in any way you like.
    */
@@ -36,10 +33,22 @@ class Replicator(val replica: ActorRef) extends Actor {
     ret
   }
 
-  
-  /* TODO Behavior for the Replicator. */
-  def receive: Receive = {
-    case _ =>
+  context.system.scheduler.schedule(0.millisecond, 100.milliseconds) {
+    acks foreach {
+      case (seq, (_, Replicate(key, valueOption, _))) =>
+        replica ! Snapshot(key, valueOption, seq)
+    }
   }
+  
+  def receive: Receive = {
+    case rep @ Replicate(key, valueOption, id) =>
+      val seq = nextSeq
+      replica ! Snapshot(key, valueOption, seq)
+      acks += seq -> (sender(), rep)
 
+    case SnapshotAck(key, seq) =>
+      val (sender, Replicate(key, _, id)) = acks(seq)
+      acks -= seq
+      sender ! Replicated(key, id)
+  }
 }
