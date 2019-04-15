@@ -30,7 +30,7 @@ class Bagging(object):
                                    axis=1, arr=X)
 
     def score(self, X, y):
-        return sum([m.score(X, y) for m in self.models]) / self.T
+        return np.sum(self.predict(X) == y) * 1.0 / len(y)
 
 
 def get_dt():
@@ -43,6 +43,6 @@ if __name__ == '__main__':
                   [2, 1], [2, 2], [2, 2],
                   [3, 1], [3, 2], [3, 3]])
     y = np.array([-1, 1, -1, -1, 1, -1, 1, 1, 1])
-    bagging = Bagging(get_dt, T=300)
+    bagging = Bagging(get_dt, T=10)
     bagging.fit(X, y)
     print bagging.ein
