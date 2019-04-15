@@ -39,7 +39,7 @@ class DecisionTree(object):
 
     def fit(self, X, y):
         if (self.impurity(y) < 1e-4 or
-                (self.depth is not None and self.depth <= 1)):
+                (self.depth is not None and self.depth < 1)):
             return self.__make_leaf__(X, y)
         self.is_leaf = False
         branch_cond = self.__branching__(X, y)
