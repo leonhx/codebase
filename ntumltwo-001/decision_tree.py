@@ -2,8 +2,6 @@ import numpy as np
 
 
 def gini(y):
-    if len(y) == 0:
-        return 0.0
     uniq_y = np.unique(y)
     most_k_count = max([np.sum(y == k) for k in uniq_y])
     return 1.0 - 1.0 * most_k_count / len(y)
@@ -41,7 +39,7 @@ class DecisionTree(object):
         self.i, self.theta, min_impurity_val = self.__branching__(X, y)
         left_cond = X[:, self.i] < self.theta
         right_cond = X[:, self.i] > self.theta
-        if (min_impurity_val == 0 or np.sum(left_cond) == 0
+        if (self.impurity(y) == 0 or np.sum(left_cond) == 0
                 or np.sum(right_cond) == 0 or
                 (self.depth is not None and self.depth <= 1)):
             self.is_leaf = True
@@ -92,7 +90,7 @@ if __name__ == '__main__':
                   [2, 1], [2, 2], [2, 2],
                   [3, 1], [3, 2], [3, 3]])
     y = np.array([1, -1, -1, 1, 1, -1, -1, 1, -1])
-    dt = DecisionTree(depth=2)
+    dt = DecisionTree()
     dt.fit(X, y)
     print dt.predict(X)
     print dt.__prepr__()
