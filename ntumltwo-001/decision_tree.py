@@ -3,8 +3,7 @@ import numpy as np
 
 def gini(y):
     uniq_y = np.unique(y)
-    most_k_count = max([np.sum(y == k) for k in uniq_y])
-    return 1.0 - 1.0 * most_k_count / len(y)
+    return 1.0 - sum([(np.sum(y == k) * 1.0 / len(y)) ** 2 for k in uniq_y])
 
 
 class DecisionTree(object):
@@ -16,9 +15,7 @@ class DecisionTree(object):
     def __branching__(self, X, y):
         """return (i, theta, min_impurity_val)"""
         N, d = X.shape
-        best_i = 0
-        best_theta = 0.0
-        min_impurity_val = N + 1
+        result = None
         for i in xrange(d):
             Xi = X[:, i]
             x = np.sort(np.unique(X[:, i]))
@@ -28,32 +25,35 @@ class DecisionTree(object):
                 c2 = Xi < theta
                 impurity_val = np.sum(c1) * self.impurity(y[c1]) + \
                     np.sum(c2) * self.impurity(y[c2])
-                if impurity_val < min_impurity_val:
-                    best_i = i
-                    best_theta = theta
-                    min_impurity_val = impurity_val
-        return (best_i, best_theta, min_impurity_val)
+                if result is None or impurity_val < result[-1]:
+                    result = (i, theta, impurity_val)
+        return result
+
+    def __make_leaf__(self, y):
+        self.is_leaf = True
+        self.node_count = 0
+        uniq_y = np.unique(y)
+        y_counts = [(k, np.sum(y == k)) for k in uniq_y]
+        self.y = max(y_counts, key=lambda e: e[1])[0]
 
     def fit(self, X, y):
+        if (self.impurity(y) < 1e-4 or
+                (self.depth is not None and self.depth <= 1)):
+            return self.__make_leaf__(y)
         self.is_leaf = False
-        self.i, self.theta, min_impurity_val = self.__branching__(X, y)
+        branch_cond = self.__branching__(X, y)
+        if branch_cond is None:
+            return self.__make_leaf__(y)
+        self.i, self.theta, min_impurity_val = branch_cond
         left_cond = X[:, self.i] < self.theta
         right_cond = X[:, self.i] > self.theta
-        if (self.impurity(y) == 0 or np.sum(left_cond) == 0
-                or np.sum(right_cond) == 0 or
-                (self.depth is not None and self.depth <= 1)):
-            self.is_leaf = True
-            self.node_count = 0
-            uniq_y = np.unique(y)
-            y_counts = [(k, np.sum(y == k)) for k in uniq_y]
-            self.y = max(y_counts, key=lambda e: e[1])[0]
-            return
         new_depth = self.depth - 1 if self.depth is not None else None
         self.left = DecisionTree(self.impurity, new_depth)
         self.left.fit(X[left_cond], y[left_cond])
         self.right = DecisionTree(self.impurity, new_depth)
         self.right.fit(X[right_cond], y[right_cond])
         self.node_count = self.left.node_count + self.right.node_count + 1
+        self.ein = np.sum(self.predict(X) != y) * 1.0 / len(y)
 
     def __predict__(self, x):
         if self.is_leaf:
@@ -89,8 +89,10 @@ if __name__ == '__main__':
     X = np.array([[1, 1], [1, 2], [1, 3],
                   [2, 1], [2, 2], [2, 2],
                   [3, 1], [3, 2], [3, 3]])
-    y = np.array([1, -1, -1, 1, 1, -1, -1, 1, -1])
+    y = np.array([-1, 1, -1, -1, 1, -1, 1, 1, 1])
     dt = DecisionTree()
     dt.fit(X, y)
     print dt.predict(X)
+    print dt.node_count
     print dt.__prepr__()
+    print dt.ein
