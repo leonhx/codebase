@@ -1,29 +1,60 @@
 #include <cstdio>
 
-char ROOM[21][21];
+char ROOM[23][23];
 int DP[][2] = { { -1, 0 }, { 0, 1 }, { 0, -1 }, { 1, 0 } };
-int X, Y;
 int ch;
+int count;
 
-int next_char() {
-    while (ch = getchar() && ch == '\n')
-        ;
-    return ch;
+void dfs(int x, int y)
+{
+    count++;
+    for (int i = 0; i < 4; ++i)
+    {
+        int dx = DP[i][0];
+        int dy = DP[i][1];
+        if (ROOM[x + dx][y + dy] == '.')
+        {
+            ROOM[x + dx][y + dy] = '#';
+            dfs(x + dx, y + dy);
+        }
+    }
 }
 
 int main(int argc, char const *argv[])
 {
     int W, H;
+    int X, Y;
+
     scanf("%d %d\n", &W, &H);
 
-    while (W != 0 && H != 0) {
-        int i = 0, j = 0;
-        while (ch = next_char()) {
-            ROOM[i][j] = ch;
-            i += (j + 1) / W;
-            j += (j + 1) % W;
+    while (W && H)
+    {
+        count = 0;
+
+        for (int k = 0; k < W + 2; ++k)
+        {
+            ROOM[0][k] = ROOM[H + 1][k] = '#';
         }
 
+        int i = 1, j = 0;
+        while ((ch = getchar()) && i < H + 1)
+        {
+            ROOM[i][0] = '#';
+            ROOM[i][W + 1] = '#';
+            if (ch == '\n')
+                continue;
+            if (ch == '@')
+            {
+                X = i;
+                Y = j + 1;
+            }
+            ROOM[i][j + 1] = ch;
+            i += (j + 1) / W;
+            j = (j + 1) % W;
+        }
+
+        dfs(X, Y);
+        printf("%d\n", count);
         scanf("%d %d\n", &W, &H);
     }
 
