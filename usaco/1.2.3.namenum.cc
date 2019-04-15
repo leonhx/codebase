@@ -14,8 +14,10 @@ using namespace std;
 const string NONE("NONE");
 const string KEYPAD("ABCDEFGHIJKLMNOPRSTUVWXY");
 
-int str2key(string s) {
-    int i = 0;
+typedef long long int uint64;
+
+uint64 str2key(string s) {
+    uint64 i = 0;
     for (char& c : s) {
         i *= 10;
         size_t found = KEYPAD.find(c);
@@ -25,6 +27,7 @@ int str2key(string s) {
             return 0;
         }
     }
+
     return i;
 }
 
@@ -33,16 +36,16 @@ int main() {
     ifstream fdict ("dict.txt");
     ofstream fout ("namenum.out");
 
-    map<int, string> dict;
+    map<uint64, string> dict;
     string t;
     while (!fdict.eof()) {
         fdict >> t;
-        int key = str2key(t);
+        uint64 key = str2key(t);
         if (key != 0)
             dict[key] = t;
     }
 
-    int key;
+    uint64 key;
     fin >> key;
 
     auto it = dict.find(key);
