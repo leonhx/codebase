@@ -45,6 +45,7 @@ class DecisionTree(object):
                 or np.sum(right_cond) == 0 or
                 (self.depth is not None and self.depth <= 1)):
             self.is_leaf = True
+            self.node_count = 0
             uniq_y = np.unique(y)
             y_counts = [(k, np.sum(y == k)) for k in uniq_y]
             self.y = max(y_counts, key=lambda e: e[1])[0]
@@ -54,6 +55,7 @@ class DecisionTree(object):
         self.left.fit(X[left_cond], y[left_cond])
         self.right = DecisionTree(self.impurity, new_depth)
         self.right.fit(X[right_cond], y[right_cond])
+        self.node_count = self.left.node_count + self.right.node_count + 1
 
     def __predict__(self, x):
         if self.is_leaf:
