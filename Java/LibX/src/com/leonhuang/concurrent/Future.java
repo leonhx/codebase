@@ -92,6 +92,16 @@ public class Future<T> {
         else throw new RuntimeException(String.format("%s has not finished", this));
     }
 
+    public final T waitThenGet(long millis) throws Exception {
+        this.tryAwait(millis);
+        return this.get();
+    }
+
+    public final T waitThenGet() throws Exception {
+        while (!this.isDone() && this.tryAwait(1000)) ;
+        return this.get();
+    }
+
     public final boolean tryAwait(long millis) {
         while (millis > 0 && !this.isDone()) {
             try {
@@ -101,7 +111,7 @@ public class Future<T> {
                 return false;
             }
         }
-        return this.isDone();
+        return true;
     }
 
     public final Future<T> onSuccess(final Func1Void<T> callback) {
@@ -149,7 +159,6 @@ public class Future<T> {
 
     public final <R, E extends Exception> R flatMap(final Func1WithErr<T, R, E> func) throws Exception {
         final Future<R> mappedResult = this.map(func);
-        while (!mappedResult.isDone() && mappedResult.tryAwait(1000)) ;
-        return mappedResult.get();
+        return mappedResult.waitThenGet();
     }
 }
