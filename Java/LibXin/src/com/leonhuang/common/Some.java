@@ -35,7 +35,12 @@ public class Some<T> implements Option<T> {
         if (this == obj) return true;
         if (!(obj instanceof Some))
             return false;
-        Some that = (Some) obj;
+        final Some that = (Some) obj;
         return new EqualsBuilder().append(this.value, that.value).isEquals();
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Some(%s)", this.value);
     }
 }

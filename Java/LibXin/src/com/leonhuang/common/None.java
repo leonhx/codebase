@@ -30,5 +30,10 @@ public class None<T> implements Option<T> {
         if (this == obj) return true;
         return (obj instanceof None);
     }
+
+    @Override
+    public String toString() {
+        return String.format("None");
+    }
 }
 

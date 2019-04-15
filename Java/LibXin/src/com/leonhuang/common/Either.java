@@ -1,5 +1,7 @@
 package com.leonhuang.common;
 
+import java.lang.reflect.Type;
+
 public class Either<A, B> {
     private A aVal;
     private boolean isASet;
@@ -62,18 +64,23 @@ public class Either<A, B> {
         if (this == obj) return true;
         if (!(obj instanceof Either))
             return false;
-        Either that = (Either) obj;
+        final Either that = (Either) obj;
         EqualsBuilder eb = new EqualsBuilder();
         if (this.isASet && that.isASet) {
             eb.append(this.aVal, that.aVal);
-        } else {
+        } else if (this.isASet || that.isASet) {
             return false;
         }
         if (this.isBSet && that.isBSet) {
             eb.append(this.bVal, that.bVal);
-        } else {
+        } else if (this.isBSet || that.isBSet) {
             return false;
         }
         return eb.isEquals();
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Either(%s, %s)", this.aVal, this.bVal);
     }
 }
