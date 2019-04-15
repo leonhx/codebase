@@ -78,3 +78,4 @@ docs/_build/
 *.swap
 *.tmp
 *.temp
+*.in
