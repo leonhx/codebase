@@ -33,3 +33,6 @@
           [(eq? old (car lat))
            (cons (car lat) (cons new (cdr lat)))]
           [else (cons (car lat) (insertR new old (cdr lat)))])))
+
+(define add1
+  (lambda (n) (+ n 1)))
