@@ -58,6 +58,12 @@ public class Futures<T> {
         };
     }
 
+    public final void waitAllDone() {
+        for (Future<T> future : futures) {
+            future.waitDone();
+        }
+    }
+
     public final int size() {
         return futures.size();
     }

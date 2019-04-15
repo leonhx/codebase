@@ -48,6 +48,7 @@ public class Demo {
         });
         fs.add(f);
         fs.add(f2);
+        fs.promise().future().waitDone();
         System.out.println(fs.allDone());
         System.out.println(fs.anySuccess());
         System.out.println(fs.allFailure());
