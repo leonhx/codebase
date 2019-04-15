@@ -85,7 +85,10 @@ class DecisionTree(object):
                                    axis=1, arr=X)
 
     def error(self, X, y):
-        return np.sum(self.predict(X) != y) * 1.0 / len(y)
+        return 1.0 - self.score(X, y)
+
+    def score(self, X, y):
+        return np.sum(self.predict(X) == y) * 1.0 / len(y)
 
 
 if __name__ == '__main__':
