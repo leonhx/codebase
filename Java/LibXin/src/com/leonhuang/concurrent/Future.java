@@ -1,6 +1,7 @@
 package com.leonhuang.concurrent;
 
 import com.leonhuang.common.Either;
+import com.leonhuang.common.Function1;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -9,9 +10,11 @@ public class Future<T> {
     public abstract class SuccessCallback {
         public abstract void apply(T value);
     }
+
     public abstract class FailureCallback {
         public abstract void apply(Exception error);
     }
+
     public abstract class CompleteCallback {
         public abstract void apply();
     }
@@ -96,10 +99,22 @@ public class Future<T> {
         return isDone() && !this.succeeded.get();
     }
 
-    public final T get() throws InterruptedException {
+    public final T get() throws Exception {
         if (this.isSuccess()) return this.result.get();
-        else if (this.isFailure()) throw new IllegalStateException(String.format("%s failed to get result", this));
-        else throw new InterruptedException(String.format("%s has not finished", this));
+        else if (this.isFailure()) throw error.get();
+        else throw new RuntimeException(String.format("%s has not finished", this));
+    }
+
+    public final boolean tryAwait(long millis) {
+        while (millis > 0 && !this.isDone()) {
+            try {
+                Thread.sleep(1);
+                millis--;
+            } catch (InterruptedException e) {
+                return false;
+            }
+        }
+        return this.isDone();
     }
 
     public final Future<T> onSuccess(final SuccessCallback callback) {
@@ -118,5 +133,28 @@ public class Future<T> {
         this.completeCallback = callback;
         this.applyCallback();
         return this;
+    }
+
+    public final <R> Future<R> map(final Function1<T, R> func) {
+        final Future<T> self = this;
+        return new Promise<R>() {
+            @Override
+            public R run() throws Exception {
+                while (!self.isDone()) {
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+                return func.apply(self.get());
+            }
+        }.future();
+    }
+
+    public final <R> R flatMap(final Function1<T, R> func) throws Exception {
+        final Future<R> mappedResult = this.map(func);
+        while (!mappedResult.isDone() && mappedResult.tryAwait(1000)) ;
+        return mappedResult.get();
     }
 }
