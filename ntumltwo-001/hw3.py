@@ -60,55 +60,68 @@ def _q15():
     print 1 - tree.score(*load_test())
 
 
-def q16():
+def q16_bag(param):
     def get_decision_tree():
         return DecisionTree()
-    T = 300
-    X, y = load_train()
-    bagging = Bagging(get_decision_tree, T=T)
+    X, y = param
+    bagging = Bagging(get_decision_tree, T=300)
     bagging.fit(X, y)
-    print bagging.ein
+    return bagging
 
 
-def _q16():
-    T = 300
+def q16_print_ein(param):
+    bagging = q16_bag(param)
+    eins = [1 - m.score(*param) for m in bagging.models]
+    ein_g = sum(eins) * 1.0 / len(eins)
+    ein_G = 1 - bagging.score(*param)
+    eout_G = 1 - bagging.score(*load_test())
+    print '-' * 6
+    print 'q16:', ein_g
+    print 'q17:', ein_G
+    print 'q18:', eout_G
+    return (ein_g, ein_G, eout_G)
+
+
+def q16():
     X, y = load_train()
-    bagging = BaggingClassifier(DecisionTreeClassifier(), n_estimators=T,
-                                n_jobs=-1)
+    import multiprocessing as par
+    pool = par.Pool(processes=par.cpu_count())
+    R = 3
+    res = pool.map(q16_print_ein, [(X, y)] * R)
+    print '-' * 6
+    print '- q16:', sum([e[0] for e in res]) * 1.0 / len(res)
+    print '- q17:', sum([e[1] for e in res]) * 1.0 / len(res)
+    print '- q18:', sum([e[2] for e in res]) * 1.0 / len(res)
+
+
+def q19_bag(param):
+    def get_decision_tree():
+        return DecisionTree(depth=1)
+    X, y = param
+    bagging = Bagging(get_decision_tree, T=300)
     bagging.fit(X, y)
-    print 1 - bagging.score(X, y)
+    return bagging
 
 
-def q17():
-    pass
-
-
-def _q17():
-    pass
-
-
-def q18():
-    pass
-
-
-def _q18():
-    pass
+def q19_print_ein(param):
+    bagging = q19_bag(param)
+    ein_G = 1 - bagging.score(*param)
+    eout_G = 1 - bagging.score(*load_test())
+    print '-' * 6
+    print 'q19:', ein_G
+    print 'q20:', eout_G
+    return (ein_G, eout_G)
 
 
 def q19():
-    pass
-
-
-def _q19():
-    pass
-
-
-def q20():
-    pass
-
-
-def _q20():
-    pass
+    X, y = load_train()
+    import multiprocessing as par
+    pool = par.Pool(processes=par.cpu_count())
+    R = 3
+    res = pool.map(q19_print_ein, [(X, y)] * R)
+    print '-' * 6
+    print '- q19:', sum([e[0] for e in res]) * 1.0 / len(res)
+    print '- q20:', sum([e[1] for e in res]) * 1.0 / len(res)
 
 
 def run(func):
@@ -117,7 +130,6 @@ def run(func):
 
 
 if __name__ == '__main__':
-    qs = [q13, _q13, q14, _q14, q15, _q15, q16, _q16, q17, _q17, q18, _q18,
-          q19, _q19, q20, _q20]
+    qs = [q16, q19]
     for q in qs:
         run(q)
