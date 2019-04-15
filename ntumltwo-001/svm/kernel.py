@@ -52,7 +52,7 @@ class KernelSVM(object):
             a = self.alpha[i]
             if a > 10e-5:
                 self.b -= self.alpha[i] * y[i] * self.kernel(X[i], X[sv_i])
-        self.w = np.r_[self.b, w]
+        # self.w = np.r_[self.b, w]
         self.X = X
         self.y = y
 
@@ -62,7 +62,7 @@ class KernelSVM(object):
         for i in xrange(len(self.alpha)):
             a = self.alpha[i]
             if a > 10e-5:
-                y += self.alpha[i] * y[i] * self.kernel(X[i], X[sv_i])
+                y += a * self.y[i] * self.kernel(X[i], x)
         if y >= 0:
             return 1
         else:
