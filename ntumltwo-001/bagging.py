@@ -1,5 +1,7 @@
 import numpy as np
-from random import randint
+import os
+import time
+from random import Random
 
 
 class Bagging(object):
@@ -10,8 +12,10 @@ class Bagging(object):
         self.T = T
 
     def __fit_one__(self, X, y):
+        local_rand = Random()
+        local_rand.seed(time.time() + os.getpid())
         model = self.get_model()
-        indices = [randint(0, len(X) - 1)
+        indices = [local_rand.randint(0, len(X) - 1)
                    for _ in xrange(int(self.sample_size * len(X)))]
         model.fit(X[indices], y[indices])
         return model
@@ -34,15 +38,15 @@ class Bagging(object):
 
 
 def get_dt():
-    return DecisionTree()
+    return DecisionTree(depth=1)
 
 
 if __name__ == '__main__':
     from decision_tree import DecisionTree
     X = np.array([[1, 1], [1, 2], [1, 3],
-                  [2, 1], [2, 2], [2, 2],
+                  [2, 1], [2, 2], [2, 3],
                   [3, 1], [3, 2], [3, 3]])
     y = np.array([-1, 1, -1, -1, 1, -1, 1, 1, 1])
-    bagging = Bagging(get_dt, T=10)
+    bagging = Bagging(get_dt, T=300)
     bagging.fit(X, y)
-    print bagging.ein
+    print 1 - bagging.score(X, y)
