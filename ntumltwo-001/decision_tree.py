@@ -40,8 +40,8 @@ class DecisionTree(object):
         if self.impurity(y) < 1e-5:
             self.is_leaf = True
             uniq_y = np.unique(y)
-            y_counts = {k: np.sum(y == k) for k in uniq_y}
-            self.y = max(y_counts, key=lambda k: y_counts[k])
+            y_counts = [(k, np.sum(y == k)) for k in uniq_y]
+            self.y = max(y_counts, key=lambda e: e[1])[0]
             return
         self.is_leaf = False
         self.i, self.theta = self.__branching__(X, y)
