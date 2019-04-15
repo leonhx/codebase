@@ -86,3 +86,9 @@ docs/_build/
 .settings/
 *.zip
 
+# Sbt
+lib_managed/
+project/
+bin/
+target/
+submission/
