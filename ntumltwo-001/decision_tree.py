@@ -16,7 +16,7 @@ class DecisionTree(object):
         self.pruning = pruning
 
     def __branching__(self, X, y):
-        """return (i, theta)"""
+        """return (i, theta, min_impurity_val)"""
         N, d = X.shape
         best_i = 0
         best_theta = 0.0
@@ -34,19 +34,20 @@ class DecisionTree(object):
                     best_i = i
                     best_theta = theta
                     min_impurity_val = impurity_val
-        return (best_i, best_theta)
+        return (best_i, best_theta, min_impurity_val)
 
     def fit(self, X, y):
-        if self.impurity(y) < 1e-5:
+        self.is_leaf = False
+        self.i, self.theta, min_impurity_val = self.__branching__(X, y)
+        left_cond = X[:, self.i] < self.theta
+        right_cond = X[:, self.i] > self.theta
+        if (min_impurity_val == 0 or np.sum(left_cond) == 0
+                or np.sum(right_cond) == 0):
             self.is_leaf = True
             uniq_y = np.unique(y)
             y_counts = [(k, np.sum(y == k)) for k in uniq_y]
             self.y = max(y_counts, key=lambda e: e[1])[0]
             return
-        self.is_leaf = False
-        self.i, self.theta = self.__branching__(X, y)
-        left_cond = X[:, self.i] < self.theta
-        right_cond = X[:, self.i] > self.theta
         self.left = DecisionTree(self.impurity, self.pruning)
         self.left.fit(X[left_cond], y[left_cond])
         self.right = DecisionTree(self.impurity, self.pruning)
@@ -84,9 +85,9 @@ class DecisionTree(object):
 
 if __name__ == '__main__':
     X = np.array([[1, 1], [1, 2], [1, 3],
-                  [2, 1], [2, 2], [2, 3],
+                  [2, 1], [2, 2], [2, 2],
                   [3, 1], [3, 2], [3, 3]])
-    y = np.array([1, 1, 1, 1, 1, 1, 1, 1, -1])
+    y = np.array([1, -1, -1, 1, 1, -1, 1, 1, -1])
     dt = DecisionTree()
     dt.fit(X, y)
     print dt.predict(X)
